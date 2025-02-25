@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+ollama
+langchain
+langchain-community
+chromadb
+unstructured
+pydantic
