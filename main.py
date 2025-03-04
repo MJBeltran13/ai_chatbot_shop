@@ -1,7 +1,6 @@
-import os
 import re
-from flask import Flask, request, jsonify
 import subprocess
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
@@ -15,20 +14,26 @@ You can respond in English or Tagalog.
 ✅ If asked anything else, reply: "I only answer questions about auto parts at PamsWorkz."  
 
 PRODUCT CATALOG:
-- Wheels: 
-  - Michelin (17-inch): $1000 each 
-  - Michelin (18-inch): $1200 each 
-  - Goodyear (17-inch): $1100 each 
-  - Goodyear (18-inch): $1300 each 
-- Tires: 
-  - Michelin (Standard 15-inch): $2521 each (Only 2 left in stock)
-  - Bridgestone (Premium 17-inch): $2500 each 
-  - Pirelli (Standard 15-inch): $2200 each 
-  - Dunlop (Off-Road 17-inch): $2700 each 
-- Headlights: 
-  - Philips LED Headlights: $3000 each 
-  - Osram Xenon Headlights: $3500 each 
-  - Bosch Halogen Headlights: $2000 each
+Engine Components:
+Camshaft - ₱1700
+Valve - ₱1500
+Muffler (Chix Pipe) - ₱1900
+
+Transmission & Drive:
+Pulley Set - ₱2100
+Flyball - ₱500
+CVT Cleaner - ₱200
+
+Lubricants & Oils:
+Motul Oil - ₱320
+Gear Oil - ₱75
+
+Services Offered:
+Engine Upgrade (Touring/Racing) – Labor: ₱1,000 - ₱5,000
+Machine Works – Labor: ₱1,000 - ₱3,000
+Change Oil – Labor: ₱250
+CVT Cleaning – ₱300
+Engine Refresh – ₱4,000
 
 🚨 STRICT RESPONSE RULES:
 - ❌ **DO NOT answer unrelated questions.**
@@ -36,23 +41,113 @@ PRODUCT CATALOG:
 - ✅ **For unrelated questions, reply: "I only answer questions about auto parts at PamsWorkz."**
 """
 
+BADWORDS = [
+    "arse",
+    "arsehead",
+    "arsehole",
+    "ass",
+    "ass hole",
+    "asshole",
+    "bastard",
+    "bitch",
+    "bloody",
+    "bollocks",
+    "brotherfucker",
+    "bugger",
+    "bullshit",
+    "child-fucker",
+    "Christ on a bike",
+    "Christ on a cracker",
+    "cock",
+    "cocksucker",
+    "crap",
+    "cunt",
+    "dammit",
+    "damn",
+    "damned",
+    "damn it",
+    "dick",
+    "dick-head",
+    "dickhead",
+    "dumb ass",
+    "dumb-ass",
+    "dumbass",
+    "dyke",
+    "faggot",
+    "father-fucker",
+    "fatherfucker",
+    "fuck",
+    "fucker",
+    "fucking",
+    "god dammit",
+    "goddammit",
+    "God damn",
+    "god damn",
+    "goddamn",
+    "Goddamn",
+    "goddamned",
+    "goddamnit",
+    "godsdamn",
+    "hell",
+    "holy shit",
+    "horseshit",
+    "in shit",
+    "jackarse",
+    "jack-ass",
+    "jackass",
+    "Jesus Christ",
+    "Jesus fuck",
+    "Jesus Harold Christ",
+    "Jesus H. Christ",
+    "Jesus, Mary and Joseph",
+    "Jesus wept",
+    "kike",
+    "mother fucker",
+    "mother-fucker",
+    "motherfucker",
+    "nigga",
+    "nigra",
+    "pigfucker",
+    "piss",
+    "prick",
+    "pussy",
+    "shit",
+    "shit ass",
+    "shite",
+    "sibling fucker",
+    "sisterfuck",
+    "sisterfucker",
+    "slut",
+    "son of a bitch",
+    "son of a whore",
+    "spastic",
+    "sweet Jesus",
+    "twat",
+    "wanker",
+]
 
-# 🔹 Extract product prices and stock dynamically
-def get_product_details():
-    product_prices = {}
-    stock_info = {}
+PRODUCTS = {
+    "camshaft": 1700,
+    "valve": 1500,
+    "muffler": 1900,
+    "pulley set": 2100,
+    "flyball": 500,
+    "cvt cleaner": 200,
+    "motul oil": 320,
+    "gear oil": 75,
+}
 
-    # Extract product names, prices, and stock
-    product_pattern = re.findall(
-        r"- (.+?): \$([\d]+) each(?: \((.+?)\))?", KNOWLEDGE_BASE
-    )
+SERVICES = {
+    "engine upgrade": "₱1,000 - ₱5,000",
+    "machine works": "₱1,000 - ₱3,000",
+    "change oil": "₱250",
+    "cvt cleaning": "₱300",
+    "engine refresh": "₱4,000",
+}
 
-    for product, price, stock in product_pattern:
-        product_prices[product.lower()] = int(price)
-        if stock:
-            stock_info[product.lower()] = stock  # Store stock info if available
 
-    return product_prices, stock_info
+def contains_badwords(text):
+    return any(word in text for word in BADWORDS)
 
 
 @app.route("/api/chat", methods=["POST"])
@@ -63,45 +158,26 @@ def chat():
             return jsonify({"error": "Missing 'message' field in request body"}), 400
 
         user_message = data["message"].lower()
-        product_prices, stock_info = get_product_details()
 
-        # 🔹 Check if the user is asking for all products
-        if any(
-            word in user_message
-            for word in ["all products", "full catalog", "list of products"]
-        ):
-            response = "Here is the full product list:\n"
-            for product, price in product_prices.items():
-                stock_text = (
-                    f" ({stock_info[product]})" if product in stock_info else ""
-                )
-                response += f"- {product}: ${price} each{stock_text}\n"
-            return jsonify({"response": response.strip()})
+        # Check for bad words
+        if contains_badwords(user_message):
+            return jsonify({"response": "Please use respectful language."})
 
-        # 🔹 Extract product name & quantity using regex
-        quantity_match = re.search(r"(\d+)", user_message)  # Extract quantity
-        quantity = int(quantity_match.group(1)) if quantity_match else 1  # Default to 1
-
-        matched_product = None
-        for product in product_prices:
+        # Check if user asks for product prices
+        for product, price in PRODUCTS.items():
             if product in user_message:
-                matched_product = product
-                break
+                return jsonify(
+                    {"response": f"The price of {product.capitalize()} is ₱{price}."}
+                )
 
-        # 🔹 If product found, return its price
-        if matched_product:
-            unit_price = product_prices[matched_product]
-            total_price = unit_price * quantity
-            response = f"The price of {matched_product} is ${unit_price} each."
+        # Check if user asks for service prices
+        for service, price in SERVICES.items():
+            if service in user_message:
+                return jsonify(
+                    {"response": f"The cost of {service.capitalize()} is {price}."}
+                )
 
-            # 🔹 Add stock availability if it exists
-            if matched_product in stock_info:
-                response += f" {stock_info[matched_product]}."
-
-            response += f" The total price for {quantity} is ${total_price}."
-            return jsonify({"response": response})
-
-        # 🔹 If no product matched, use Ollama to generate response
+        # Use Ollama if the query is unclear
         prompt = f"{KNOWLEDGE_BASE}\nUser: {user_message}\nAssistant:"
         ollama_cmd = ["ollama", "run", "mistral", prompt]
         result = subprocess.run(
@@ -114,6 +190,7 @@ def chat():
         response = result.stdout.strip()
 
         return jsonify({"response": response})
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
