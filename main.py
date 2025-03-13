@@ -167,37 +167,36 @@ def chat():
         if contains_badwords(user_message):
             return jsonify({"response": "Please use respectful language."})
 
-        # Check if user asks for product prices
+        # Check for product prices (fast response)
         for product, price in PRODUCTS.items():
             if product in user_message:
                 return jsonify(
                     {"response": f"The price of {product.capitalize()} is ₱{price}."}
                 )
 
-        # Check if user asks for service prices
+        # Check for service prices (fast response)
         for service, price in SERVICES.items():
             if service in user_message:
                 return jsonify(
                     {"response": f"The cost of {service.capitalize()} is {price}."}
                 )
 
-        # Use Ollama if the query is unclear
-        prompt = f"{KNOWLEDGE_BASE}\nUser: {user_message}\nAssistant:"
-        ollama_cmd = ["ollama", "run", "mistral", prompt]
-        result = subprocess.run(
-            ollama_cmd,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="ignore",
-            timeout=10
-        )
-        response = result.stdout.strip()
+        # For greetings
+        greetings = ["hi", "hello", "kumusta", "magandang", "good"]
+        if any(greeting in user_message for greeting in greetings):
+            return jsonify({
+                "response": "Hello! How can I help you today? I can provide prices for our auto parts and services."
+            })
 
-        return jsonify({"response": response})
+        # Default response for unknown queries
+        return jsonify({
+            "response": "I only answer questions about auto parts at PamsWorkz. Please ask about our specific products or services."
+        })
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({
+            "response": "I apologize, but I'm having trouble processing your request. Please try asking about specific products or services."
+        }), 500
 
 
 if __name__ == "__main__":
