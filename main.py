@@ -163,6 +163,36 @@ def chat():
 
         user_message = data["message"].lower()
 
+        # Check for service list requests
+        if any(keyword in user_message for keyword in ["what services", "available services", "list services", "services available"]):
+            services_list = "\n".join([
+                "Available Services at PamsWorkz:",
+                "1. Engine Upgrade (Touring/Racing) – Labor: ₱1,000 - ₱5,000",
+                "2. Machine Works – Labor: ₱1,000 - ₱3,000",
+                "3. Change Oil – Labor: ₱250",
+                "4. CVT Cleaning – ₱300",
+                "5. Engine Refresh – ₱4,000"
+            ])
+            return jsonify({"response": services_list})
+
+        # Check for product list requests
+        if any(keyword in user_message for keyword in ["what products", "available products", "list products", "products available"]):
+            products_list = "\n".join([
+                "Available Products at PamsWorkz:",
+                "Engine Components:",
+                "- Camshaft: ₱1,700",
+                "- Valve: ₱1,500",
+                "- Muffler (Chix Pipe): ₱1,900",
+                "\nTransmission & Drive:",
+                "- Pulley Set: ₱2,100",
+                "- Flyball: ₱500",
+                "- CVT Cleaner: ₱200",
+                "\nLubricants & Oils:",
+                "- Motul Oil: ₱320",
+                "- Gear Oil: ₱75"
+            ])
+            return jsonify({"response": products_list})
+
         # Check for bad words
         if contains_badwords(user_message):
             return jsonify({"response": "Please use respectful language."})
@@ -190,7 +220,7 @@ def chat():
 
         # Default response for unknown queries
         return jsonify({
-            "response": "I only answer questions about auto parts at PamsWorkz. Please ask about our specific products or services."
+            "response": "How can I help you? You can ask about:\n1. Specific product prices\n2. Service costs\n3. List of available products\n4. List of available services"
         })
 
     except Exception as e:
