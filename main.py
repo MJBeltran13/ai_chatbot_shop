@@ -154,6 +154,24 @@ def contains_badwords(text):
     return any(word in words for word in BADWORDS)
 
 
+def get_ai_explanation(query, context):
+    try:
+        prompt = f"""You are PamsBot, the auto parts specialist at PamsWorkz workshop. 
+Explain this query in 2-3 sentences: {query}
+Context: {context}
+Keep it simple and focused on auto parts/services only."""
+        
+        result = subprocess.run(
+            ['ollama', 'run', 'phi', prompt],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        return result.stdout.strip()
+    except Exception as e:
+        return None
+
+
 @app.route("/api/chat", methods=["POST"])
 def chat():
     try:
@@ -162,6 +180,28 @@ def chat():
             return jsonify({"error": "Missing 'message' field in request body"}), 400
 
         user_message = data["message"].lower()
+
+        # Handle "what is" queries
+        if "what is" in user_message:
+            # Check for services first
+            for service, price in SERVICES.items():
+                if service in user_message:
+                    context = f"This is a service offered at PamsWorkz. The cost is {price}."
+                    ai_response = get_ai_explanation(service, context)
+                    if ai_response:
+                        return jsonify({
+                            "response": f"{ai_response}\nThe cost for this service is {price}."
+                        })
+
+            # Check for products
+            for product, price in PRODUCTS.items():
+                if product in user_message:
+                    context = f"This is a product sold at PamsWorkz. The price is ₱{price}."
+                    ai_response = get_ai_explanation(product, context)
+                    if ai_response:
+                        return jsonify({
+                            "response": f"{ai_response}\nThe price is ₱{price}."
+                        })
 
         # Check for service list requests
         if any(keyword in user_message for keyword in ["what services", "available services", "list services", "services available"]):
