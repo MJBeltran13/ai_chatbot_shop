@@ -7,13 +7,13 @@ from functools import lru_cache
 app = Flask(__name__)
 
 KNOWLEDGE_BASE = """
-You are PamsBot, the auto parts specialist at PamsWorkz workshop.
+You are PomBot, the auto parts specialist at PomWorkz workshop.
 You ONLY answer questions about the products and pricing listed below.
 You are created by Cleo Dipasupil.
 You can respond in English or Tagalog.
 
 ❌ DO NOT answer any question that is NOT related to the products below.  
-✅ If asked anything else, reply: "I only answer questions about auto parts at PamsWorkz."  
+✅ If asked anything else, reply: "I only answer questions about auto parts at PomWorkz."  
 
 PRODUCT CATALOG:
 Engine Components:
@@ -40,7 +40,7 @@ Engine Refresh – ₱4,000
 🚨 STRICT RESPONSE RULES:
 - ❌ **DO NOT answer unrelated questions.**
 - ✅ **Always include exact product prices and availability.**
-- ✅ **For unrelated questions, reply: "I only answer questions about auto parts at PamsWorkz."**
+- ✅ **For unrelated questions, reply: "I only answer questions about auto parts at PomWorkz."**
 """
 
 BADWORDS = [
@@ -160,18 +160,27 @@ def get_ai_response(query_type, query, context=""):
     """Get AI response using Phi model with caching"""
     try:
         prompts = {
-            "what_is": f"""You are PamsBot, the auto parts specialist at PamsWorkz workshop.
+            "what_is": f"""You are PomBot, the auto parts specialist at PomWorkz workshop.
 Explain in 2-3 sentences what this is: {query}
 Context: {context}
-Keep it focused on auto parts/services only.""",
+Keep it focused on auto parts/services only.
+Be direct and technical in your explanation.""",
             
-            "greeting": """You are PamsBot, the auto parts specialist at PamsWorkz workshop.
-Give a friendly greeting and mention you can help with auto parts and services.
-Keep it under 2 sentences.""",
+            "greeting": f"""You are PomBot, the auto parts specialist at PomWorkz workshop.
+{query}
+Respond with a friendly greeting in 1-2 sentences. Mention you can help with auto parts and services.
+If the greeting is in Tagalog, respond in Tagalog.""",
             
-            "help": """You are PamsBot, the auto parts specialist at PamsWorkz workshop.
-List 4-5 example questions customers can ask about our products and services.
-Format with bullet points."""
+            "help": """You are PomBot, the auto parts specialist at PomWorkz workshop.
+Generate a helpful response with 4-5 example questions about our products and services.
+Include specific examples about prices, services, and product information.""",
+
+            "general": f"""You are PomBot, the auto parts specialist at PomWorkz workshop.
+Question: {query}
+Context: {context}
+Respond in 1-2 sentences, focusing only on auto parts and services.
+If the question is unrelated, respond: "I only answer questions about auto parts at PomWorkz."
+"""
         }
         
         result = subprocess.run(
@@ -182,13 +191,14 @@ Format with bullet points."""
         )
         return result.stdout.strip()
     except Exception as e:
+        print(f"AI Error: {str(e)}")  # For debugging
         return None
 
 
 def format_products_list():
     """Format products list with prices"""
     return "\n".join([
-        "Available Products at PamsWorkz:",
+        "Available Products at PomWorkz:",
         "Engine Components:",
         "- Camshaft: ₱1,700",
         "- Valve: ₱1,500",
@@ -206,7 +216,7 @@ def format_products_list():
 def format_services_list():
     """Format services list with prices"""
     return "\n".join([
-        "Available Services at PamsWorkz:",
+        "Available Services at PomWorkz:",
         "1. Engine Upgrade (Touring/Racing) – Labor: ₱1,000 - ₱5,000",
         "2. Machine Works – Labor: ₱1,000 - ₱3,000",
         "3. Change Oil – Labor: ₱250",
@@ -222,7 +232,7 @@ def chat():
         if not data or "message" not in data:
             return jsonify({"error": "Missing 'message' field in request body"}), 400
 
-        user_message = data["message"].lower()
+        user_message = data["message"].lower().strip()
 
         # Check for bad words first
         if contains_badwords(user_message):
@@ -232,7 +242,7 @@ def chat():
         if any(q in user_message for q in ["who created you", "who made you", "who is your creator"]):
             return jsonify({"response": "I am created by Cleo Dipasupil."})
 
-        # Handle list requests
+        # Handle list requests with static responses (for speed and reliability)
         if any(keyword in user_message for keyword in ["what services", "available services", "list services"]):
             return jsonify({"response": format_services_list()})
         
@@ -243,39 +253,66 @@ def chat():
         if "what is" in user_message:
             # Check services first
             for service, price in SERVICES.items():
-                if service in user_message:
-                    context = f"This is a service at PamsWorkz costing {price}."
+                if service.replace(" ", "") in user_message.replace(" ", ""):
+                    context = f"""Service details:
+                    - Name: {service}
+                    - Cost: {price}
+                    - This is a professional automotive service at PomWorkz"""
+                    
                     ai_response = get_ai_response("what_is", service, context)
                     if ai_response:
                         return jsonify({
-                            "response": f"{ai_response}\nService cost: {price}"
+                            "response": f"{ai_response}\n\nService cost: {price}"
                         })
 
             # Then check products
             for product, price in PRODUCTS.items():
-                if product in user_message:
-                    context = f"This is a product sold at PamsWorkz for ₱{price}."
+                if product.replace(" ", "") in user_message.replace(" ", ""):
+                    context = f"""Product details:
+                    - Name: {product}
+                    - Price: ₱{price}
+                    - This is an automotive part sold at PomWorkz"""
+                    
                     ai_response = get_ai_response("what_is", product, context)
                     if ai_response:
                         return jsonify({
-                            "response": f"{ai_response}\nPrice: ₱{price}"
+                            "response": f"{ai_response}\n\nPrice: ₱{price}"
                         })
 
-        # Handle direct price queries
-        for product, price in PRODUCTS.items():
-            if product in user_message and "price" in user_message:
-                return jsonify({"response": f"The price of {product.capitalize()} is ₱{price}."})
+        # Handle greetings with AI
+        greetings = ["hi", "hello", "kumusta", "magandang", "good"]
+        if any(greeting in user_message for greeting in greetings):
+            greeting_response = get_ai_response("greeting", user_message)
+            if greeting_response:
+                return jsonify({"response": greeting_response})
+            return jsonify({
+                "response": "Hello! How can I help you with our auto parts and services today?"
+            })
 
-        for service, price in SERVICES.items():
-            if service in user_message and any(word in user_message for word in ["price", "cost", "how much"]):
-                return jsonify({"response": f"The cost of {service.capitalize()} is {price}."})
+        # Handle price queries
+        if any(word in user_message for word in ["price", "cost", "how much"]):
+            for product, price in PRODUCTS.items():
+                if product in user_message:
+                    context = f"The price of {product} is ₱{price}"
+                    ai_response = get_ai_response("general", user_message, context)
+                    if ai_response:
+                        return jsonify({"response": ai_response})
+                    return jsonify({"response": f"The price of {product.capitalize()} is ₱{price}."})
 
-        # Handle greetings
-        if any(greeting in user_message for greeting in ["hi", "hello", "kumusta", "magandang", "good"]):
-            greeting_response = get_ai_response("greeting", user_message) or "Hello! How can I help you with our auto parts and services today?"
-            return jsonify({"response": greeting_response})
+            for service, price in SERVICES.items():
+                if service in user_message:
+                    context = f"The cost of {service} is {price}"
+                    ai_response = get_ai_response("general", user_message, context)
+                    if ai_response:
+                        return jsonify({"response": ai_response})
+                    return jsonify({"response": f"The cost of {service.capitalize()} is {price}."})
 
-        # Default help response
+        # Try general AI response for other queries
+        ai_response = get_ai_response("general", user_message, KNOWLEDGE_BASE)
+        if ai_response:
+            return jsonify({"response": ai_response})
+
+        # Default help response with AI
         help_response = get_ai_response("help", "") or """How can I help you? You can ask:
 • About specific product prices (e.g., "How much is a camshaft?")
 • About service costs (e.g., "What is the cost of CVT cleaning?")
@@ -285,6 +322,7 @@ def chat():
         return jsonify({"response": help_response})
 
     except Exception as e:
+        print(f"Error: {str(e)}")  # For debugging
         return jsonify({
             "response": "I apologize, but I'm having trouble processing your request. Please try asking about specific products or services."
         }), 500
