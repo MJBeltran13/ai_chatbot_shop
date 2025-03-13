@@ -190,6 +190,7 @@ def chat():
             text=True,
             encoding="utf-8",
             errors="ignore",
+            timeout=10
         )
         response = result.stdout.strip()
 
