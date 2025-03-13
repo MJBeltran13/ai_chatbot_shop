@@ -3,7 +3,7 @@ module.exports = {
     {
       name: "ai_chatbot_shop",
       script: "main.py",
-      interpreter: "python",
+      interpreter: "/usr/bin/python3",
       env: {
         PORT: "1551",
       },
