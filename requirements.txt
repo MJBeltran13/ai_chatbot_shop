@@ -6,3 +6,4 @@ langchain-community
 chromadb
 unstructured
 pydantic
+flask==3.0.0
