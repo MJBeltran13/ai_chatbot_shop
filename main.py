@@ -148,7 +148,10 @@ SERVICES = {
 
 
 def contains_badwords(text):
-    return any(word in text for word in BADWORDS)
+    # Convert text to lowercase and split into words
+    words = text.lower().split()
+    # Check if any complete word matches a bad word
+    return any(word in words for word in BADWORDS)
 
 
 @app.route("/api/chat", methods=["POST"])
