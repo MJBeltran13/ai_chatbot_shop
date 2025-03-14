@@ -2,8 +2,8 @@ module.exports = {
   apps: [
     {
       name: "pombot",
-      script: "/home/bsuadmin/marcjames/ai_chatbot_shop/venv/bin/gunicorn",
-      args: "main:app -c gunicorn.conf.py --bind 0.0.0.0:1551",
+      script: "/home/bsuadmin/marcjames/ai_chatbot_shop/venv/bin/python3",
+      args: "-m gunicorn main:app --bind 0.0.0.0:1551 -c gunicorn.conf.py",
       cwd: "/home/bsuadmin/marcjames/ai_chatbot_shop",
       interpreter: null,
       instances: 1,
