@@ -170,6 +170,26 @@ def get_ollama_response(query, context="", max_retries=3):
     """Get response from Ollama with retry logic"""
     cleaned_query = query.strip().lower()
     
+    # Expanded service-related keywords
+    service_keywords = [
+        "what are the service", "what are the servic",  # Handles typos like "servies"
+        "what service", "list service",
+        "available service", "show service",
+        "tell me the service", "what are your service",
+        "services offer", "service list"
+    ]
+    
+    # Check for service queries with more flexible matching
+    if any(keyword in cleaned_query for keyword in service_keywords):
+        return "\n".join([
+            "Here are all services offered at PomWorkz:",
+            "1. Engine Upgrade (Touring/Racing) – Labor: ₱1,000 - ₱5,000",
+            "2. Machine Works – Labor: ₱1,000 - ₱3,000",
+            "3. Change Oil – Labor: ₱250",
+            "4. CVT Cleaning – ₱300",
+            "5. Engine Refresh – ₱4,000"
+        ])
+    
     # Handle price queries directly
     if "how much" in cleaned_query or "price" in cleaned_query or "cost" in cleaned_query:
         # Check services first
@@ -256,7 +276,26 @@ def get_ai_response(query):
         if not cleaned_query:
             return "Please provide a message."
 
-        # Check for greetings first
+        # Move service check before greetings to prevent greeting responses for service queries
+        service_keywords = [
+            "what are the service", "what are the servic",
+            "what service", "list service",
+            "available service", "show service",
+            "tell me the service", "what are your service",
+            "services offer", "service list"
+        ]
+        
+        if any(keyword in cleaned_query for keyword in service_keywords):
+            return "\n".join([
+                "Here are all services offered at PomWorkz:",
+                "1. Engine Upgrade (Touring/Racing) – Labor: ₱1,000 - ₱5,000",
+                "2. Machine Works – Labor: ₱1,000 - ₱3,000",
+                "3. Change Oil – Labor: ₱250",
+                "4. CVT Cleaning – ₱300",
+                "5. Engine Refresh – ₱4,000"
+            ])
+
+        # Check for greetings after service check
         if any(greeting in cleaned_query for greeting in ["hello", "hi", "kumusta", "magandang"]):
             return "Hello! I'm PomBot, your auto parts specialist at PomWorkz. How can I help you today? You can ask about our products, services, or prices."
 
