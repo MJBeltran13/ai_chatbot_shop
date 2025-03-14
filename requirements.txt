@@ -14,3 +14,4 @@ urllib3==1.26.15
 chardet==4.0.0
 charset-normalizer==2.0.12
 waitress==2.0.0
+flask-cors==3.0.10

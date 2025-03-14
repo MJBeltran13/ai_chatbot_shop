@@ -7,11 +7,15 @@ from waitress import serve
 import json
 import time
 from werkzeug.serving import run_simple
+from flask_cors import CORS  # Add CORS support
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 # Configuration
 OLLAMA_API_URL = "http://localhost:11434/api/generate"
+HOST = "0.0.0.0"  # Listen on all interfaces
+PORT = int(os.environ.get("PORT", 1551))
 
 KNOWLEDGE_BASE = """
 You are PomBot, the auto parts specialist at PomWorkz workshop.
@@ -269,8 +273,20 @@ def get_ai_response(query):
         return "I encountered an error. Please try again."
 
 
-@app.route("/api/chat", methods=["POST"])
+@app.after_request
+def after_request(response):
+    """Add headers to allow cross-origin requests"""
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
+
+
+@app.route("/api/chat", methods=["POST", "OPTIONS"])
 def chat():
+    if request.method == "OPTIONS":
+        return jsonify({"status": "ok"}), 200
+        
     try:
         data = request.get_json()
         if not data or "message" not in data:
@@ -314,5 +330,5 @@ def create_app():
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 1551))
-    run_simple('0.0.0.0', port, app, use_reloader=True)
+    print(f"Starting server on {HOST}:{PORT}")
+    run_simple(HOST, PORT, app, use_reloader=True)
