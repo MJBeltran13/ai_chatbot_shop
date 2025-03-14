@@ -1,15 +1,24 @@
 module.exports = {
   apps: [
     {
-      name: "ai_chatbot_shop",
-      script: "main.py",
-      interpreter: "/home/bsuadmin/marcjames/ai_chatbot_shop/venv/bin/python3",
+      name: "pombot",
+      script: "wsgi.py",
+      interpreter: "python3",
+      instances: 1,
+      exec_mode: "fork",
+      max_memory_restart: "500M",
       env: {
-        PORT: "1551",
-        PYTHONPATH:
-          "/home/bsuadmin/marcjames/ai_chatbot_shop/venv/lib/python3.8/site-packages",
+        PORT: 1551,
+        PYTHONUNBUFFERED: "true",
       },
-      watch: true,
+      error_file: "logs/err.log",
+      out_file: "logs/out.log",
+      log_file: "logs/combined.log",
+      time: true,
+      autorestart: true,
+      watch: false,
+      max_restarts: 10,
+      restart_delay: 4000,
     },
   ],
 };
