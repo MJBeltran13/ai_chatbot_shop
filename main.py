@@ -168,6 +168,31 @@ def contains_badwords(text):
 
 def get_ollama_response(query, context="", max_retries=3):
     """Get response from Ollama with retry logic"""
+    # If query is about services or common questions, don't call Ollama
+    cleaned_query = query.strip().lower()
+    
+    # Handle common queries directly without calling Ollama
+    if any(keyword in cleaned_query for keyword in ["what services", "available services", "list services", "services offered"]):
+        return "\n".join([
+            "Here are the services offered at PomWorkz:",
+            "1. Engine Upgrade (Touring/Racing) – Labor: ₱1,000 - ₱5,000",
+            "2. Machine Works – Labor: ₱1,000 - ₱3,000",
+            "3. Change Oil – Labor: ₱250",
+            "4. CVT Cleaning – ₱300",
+            "5. Engine Refresh – ₱4,000"
+        ])
+    
+    if "labor" in cleaned_query:
+        return "\n".join([
+            "Here are our labor costs:",
+            "• Engine Upgrade: ₱1,000 - ₱5,000",
+            "• Machine Works: ₱1,000 - ₱3,000", 
+            "• Change Oil: ₱250",
+            "• CVT Cleaning: ₱300",
+            "• Engine Refresh: ₱4,000"
+        ])
+
+    # Original Ollama call logic
     prompt = f"""You are PomBot, the auto parts specialist at PomWorkz workshop.
 Question: {query}
 Context: {context}
@@ -220,6 +245,10 @@ def get_ai_response(query):
         if not cleaned_query:
             return "Please provide a message."
 
+        # Check for greetings first
+        if any(greeting in cleaned_query for greeting in ["hello", "hi", "kumusta", "magandang"]):
+            return "Hello! I'm PomBot, your auto parts specialist at PomWorkz. How can I help you today? You can ask about our products, services, or prices."
+
         # Check for creator/identity questions
         if any(q in cleaned_query for q in ["who created you", "who made you", "who is your creator"]):
             return "I am created by Cleo Dipasupil."
@@ -259,10 +288,7 @@ def get_ai_response(query):
             return response
             
         # Fallback responses
-        if any(greeting in cleaned_query for greeting in ["hello", "hi", "kumusta", "magandang"]):
-            return "Hello! How can I help you with our auto parts and services today?"
-        else:
-            return """How can I help you? You can ask:
+        return """How can I help you? You can ask:
 • About specific product prices (e.g., "How much is a camshaft?")
 • About service costs (e.g., "What is the cost of CVT cleaning?")
 • For product/service information (e.g., "What is engine refresh?")
