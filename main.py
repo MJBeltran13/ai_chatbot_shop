@@ -7,10 +7,10 @@ from waitress import serve
 import json
 import time
 from werkzeug.serving import run_simple
-from flask_cors import CORS  # Add CORS support
+from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app, resources={r"/api/*": {"origins": "*"}})  # Enable CORS for API routes
 
 # Configuration
 OLLAMA_API_URL = "http://localhost:11434/api/generate"
