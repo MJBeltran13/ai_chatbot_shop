@@ -168,10 +168,21 @@ def contains_badwords(text):
 
 def get_ollama_response(query, context="", max_retries=3):
     """Get response from Ollama with retry logic"""
-    # If query is about services or common questions, don't call Ollama
     cleaned_query = query.strip().lower()
     
-    # Handle common queries directly without calling Ollama
+    # Handle price queries directly
+    if "how much" in cleaned_query or "price" in cleaned_query or "cost" in cleaned_query:
+        # Check services first
+        for service, price in SERVICES.items():
+            if service in cleaned_query:
+                return f"The cost for {service} is {price}."
+                
+        # Check products
+        for product, price in PRODUCTS.items():
+            if product in cleaned_query:
+                return f"The price of {product} is ₱{price}."
+    
+    # If query is about services or common questions, don't call Ollama
     if any(keyword in cleaned_query for keyword in ["what services", "available services", "list services", "services offered"]):
         return "\n".join([
             "Here are the services offered at PomWorkz:",
