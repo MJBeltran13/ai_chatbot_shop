@@ -10,7 +10,7 @@ backlog = 2048
 workers = 3  # Reduced number of workers for stability
 worker_class = 'sync'
 worker_connections = 1000
-timeout = 30
+timeout = 120
 keepalive = 2
 
 # Logging

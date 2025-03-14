@@ -3,7 +3,7 @@ module.exports = {
     {
       name: "pombot",
       script: "/home/bsuadmin/marcjames/ai_chatbot_shop/venv/bin/gunicorn",
-      args: "main:app --bind 0.0.0.0:1551 --workers 3 --timeout 120 --access-logfile logs/access.log --error-logfile logs/error.log --log-level debug",
+      args: "main:app -c gunicorn.conf.py",
       cwd: "/home/bsuadmin/marcjames/ai_chatbot_shop",
       interpreter: null,
       instances: 1,
