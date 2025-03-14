@@ -1,10 +1,14 @@
 import re
-import subprocess
 import os
+import requests
 from flask import Flask, request, jsonify
 from functools import lru_cache
+from waitress import serve
 
 app = Flask(__name__)
+
+# Configuration
+OLLAMA_API_URL = "http://localhost:11434/api/generate"
 
 KNOWLEDGE_BASE = """
 You are PomBot, the auto parts specialist at PomWorkz workshop.
@@ -157,7 +161,7 @@ def contains_badwords(text):
 
 @lru_cache(maxsize=100)
 def get_ai_response(query_type, query, context=""):
-    """Get AI response using Phi model with caching"""
+    """Get AI response using Ollama API with caching"""
     try:
         prompts = {
             "what_is": f"""You are PomBot, the auto parts specialist at PomWorkz workshop.
@@ -182,16 +186,27 @@ Respond in 1-2 sentences, focusing only on auto parts and services.
 If the question is unrelated, respond: "I only answer questions about auto parts at PomWorkz."
 """
         }
+
+        # Prepare the request payload
+        payload = {
+            "model": "phi",
+            "prompt": prompts.get(query_type, ""),
+            "stream": False
+        }
+
+        # Make request to Ollama API
+        response = requests.post(OLLAMA_API_URL, json=payload, timeout=5)
+        response.raise_for_status()  # Raise exception for bad status codes
         
-        result = subprocess.run(
-            ['ollama', 'run', 'phi', prompts.get(query_type, "")],
-            capture_output=True,
-            text=True,
-            timeout=5
-        )
-        return result.stdout.strip()
+        # Extract response text
+        result = response.json()
+        return result.get('response', '').strip()
+
+    except requests.RequestException as e:
+        print(f"Ollama API Error: {str(e)}")  # For debugging
+        return None
     except Exception as e:
-        print(f"AI Error: {str(e)}")  # For debugging
+        print(f"General Error: {str(e)}")  # For debugging
         return None
 
 
@@ -328,6 +343,11 @@ def chat():
         }), 500
 
 
+# WSGI Application
+def create_app():
+    return app
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 1551))
-    app.run(debug=False, host="0.0.0.0", port=port)
+    serve(app, host="0.0.0.0", port=port)

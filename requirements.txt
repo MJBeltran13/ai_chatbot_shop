@@ -6,4 +6,6 @@ langchain-community
 chromadb
 unstructured
 pydantic
-flask==3.0.0
+flask==2.0.1
+requests==2.26.0
+waitress==2.0.0
