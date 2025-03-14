@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: "pombot",
-      script: "wsgi.py",
+      script: "main.py",
       interpreter: "python3",
       instances: 1,
       exec_mode: "fork",

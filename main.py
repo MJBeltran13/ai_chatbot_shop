@@ -4,6 +4,8 @@ import requests
 from flask import Flask, request, jsonify
 from functools import lru_cache
 from waitress import serve
+import json
+import time
 
 app = Flask(__name__)
 
@@ -159,85 +161,100 @@ def contains_badwords(text):
     return any(word in words for word in BADWORDS)
 
 
-@lru_cache(maxsize=100)
-def get_ai_response(query_type, query, context=""):
-    """Get AI response using Ollama API with caching"""
-    try:
-        prompts = {
-            "what_is": f"""You are PomBot, the auto parts specialist at PomWorkz workshop.
-Explain in 2-3 sentences what this is: {query}
-Context: {context}
-Keep it focused on auto parts/services only.
-Be direct and technical in your explanation.""",
-            
-            "greeting": f"""You are PomBot, the auto parts specialist at PomWorkz workshop.
-{query}
-Respond with a friendly greeting in 1-2 sentences. Mention you can help with auto parts and services.
-If the greeting is in Tagalog, respond in Tagalog.""",
-            
-            "help": """You are PomBot, the auto parts specialist at PomWorkz workshop.
-Generate a helpful response with 4-5 example questions about our products and services.
-Include specific examples about prices, services, and product information.""",
-
-            "general": f"""You are PomBot, the auto parts specialist at PomWorkz workshop.
+def get_ollama_response(query, context="", max_retries=3):
+    """Get response from Ollama with retry logic"""
+    prompt = f"""You are PomBot, the auto parts specialist at PomWorkz workshop.
 Question: {query}
 Context: {context}
-Respond in 1-2 sentences, focusing only on auto parts and services.
-If the question is unrelated, respond: "I only answer questions about auto parts at PomWorkz."
-"""
-        }
+{KNOWLEDGE_BASE}"""
 
-        # Prepare the request payload
-        payload = {
-            "model": "phi",
-            "prompt": prompts.get(query_type, ""),
-            "stream": False
-        }
+    for attempt in range(max_retries):
+        try:
+            data = {
+                "model": "phi",
+                "prompt": prompt,
+                "stream": False
+            }
+            
+            print(f"Attempt {attempt + 1}: Sending request to Ollama API")
+            response = requests.post(OLLAMA_API_URL, json=data, timeout=15)
+            
+            if response.status_code == 200:
+                result = response.json()
+                if 'response' in result and result['response'].strip():
+                    return result['response'].strip()
+            
+            print(f"Attempt {attempt + 1} failed, {'retrying' if attempt < max_retries - 1 else 'giving up'}")
+            time.sleep(1)  # Wait before retry
+            
+        except Exception as e:
+            print(f"Error in attempt {attempt + 1}: {str(e)}")
+            if attempt < max_retries - 1:
+                time.sleep(1)  # Wait before retry
+                continue
+            
+    return None
 
-        # Make request to Ollama API
-        response = requests.post(OLLAMA_API_URL, json=payload, timeout=5)
-        response.raise_for_status()  # Raise exception for bad status codes
+
+def get_ai_response(query):
+    """Get AI response with fallback"""
+    try:
+        # Clean and format the input
+        cleaned_query = query.strip().lower()
+        if not cleaned_query:
+            return "Please provide a message."
+
+        # Check for creator/identity questions
+        if any(q in cleaned_query for q in ["who created you", "who made you", "who is your creator"]):
+            return "I am created by Cleo Dipasupil."
+
+        # Check for service/product lists
+        if any(keyword in cleaned_query for keyword in ["what services", "available services", "list services"]):
+            return "\n".join([
+                "Available Services at PomWorkz:",
+                "1. Engine Upgrade (Touring/Racing) – Labor: ₱1,000 - ₱5,000",
+                "2. Machine Works – Labor: ₱1,000 - ₱3,000",
+                "3. Change Oil – Labor: ₱250",
+                "4. CVT Cleaning – ₱300",
+                "5. Engine Refresh – ₱4,000"
+            ])
         
-        # Extract response text
-        result = response.json()
-        return result.get('response', '').strip()
+        if any(keyword in cleaned_query for keyword in ["what products", "available products", "list products"]):
+            return "\n".join([
+                "Available Products at PomWorkz:",
+                "Engine Components:",
+                "- Camshaft: ₱1,700",
+                "- Valve: ₱1,500",
+                "- Muffler (Chix Pipe): ₱1,900",
+                "\nTransmission & Drive:",
+                "- Pulley Set: ₱2,100",
+                "- Flyball: ₱500",
+                "- CVT Cleaner: ₱200",
+                "\nLubricants & Oils:",
+                "- Motul Oil: ₱320",
+                "- Gear Oil: ₱75"
+            ])
 
-    except requests.RequestException as e:
-        print(f"Ollama API Error: {str(e)}")  # For debugging
-        return None
+        # Get response from Ollama
+        response = get_ollama_response(cleaned_query, KNOWLEDGE_BASE)
+        
+        # If we got a valid response, return it
+        if response and response.strip():
+            return response
+            
+        # Fallback responses
+        if any(greeting in cleaned_query for greeting in ["hello", "hi", "kumusta", "magandang"]):
+            return "Hello! How can I help you with our auto parts and services today?"
+        else:
+            return """How can I help you? You can ask:
+• About specific product prices (e.g., "How much is a camshaft?")
+• About service costs (e.g., "What is the cost of CVT cleaning?")
+• For product/service information (e.g., "What is engine refresh?")
+• To see all available products or services"""
+            
     except Exception as e:
-        print(f"General Error: {str(e)}")  # For debugging
-        return None
-
-
-def format_products_list():
-    """Format products list with prices"""
-    return "\n".join([
-        "Available Products at PomWorkz:",
-        "Engine Components:",
-        "- Camshaft: ₱1,700",
-        "- Valve: ₱1,500",
-        "- Muffler (Chix Pipe): ₱1,900",
-        "\nTransmission & Drive:",
-        "- Pulley Set: ₱2,100",
-        "- Flyball: ₱500",
-        "- CVT Cleaner: ₱200",
-        "\nLubricants & Oils:",
-        "- Motul Oil: ₱320",
-        "- Gear Oil: ₱75"
-    ])
-
-
-def format_services_list():
-    """Format services list with prices"""
-    return "\n".join([
-        "Available Services at PomWorkz:",
-        "1. Engine Upgrade (Touring/Racing) – Labor: ₱1,000 - ₱5,000",
-        "2. Machine Works – Labor: ₱1,000 - ₱3,000",
-        "3. Change Oil – Labor: ₱250",
-        "4. CVT Cleaning – ₱300",
-        "5. Engine Refresh – ₱4,000"
-    ])
+        print(f"Error in get_ai_response: {str(e)}")
+        return "I encountered an error. Please try again."
 
 
 @app.route("/api/chat", methods=["POST"])
@@ -245,102 +262,38 @@ def chat():
     try:
         data = request.get_json()
         if not data or "message" not in data:
-            return jsonify({"error": "Missing 'message' field in request body"}), 400
+            return jsonify({"error": "Missing 'message' field"}), 400
 
-        user_message = data["message"].lower().strip()
-
-        # Check for bad words first
-        if contains_badwords(user_message):
-            return jsonify({"response": "Please use respectful language."})
-
-        # Check for creator/identity questions
-        if any(q in user_message for q in ["who created you", "who made you", "who is your creator"]):
-            return jsonify({"response": "I am created by Cleo Dipasupil."})
-
-        # Handle list requests with static responses (for speed and reliability)
-        if any(keyword in user_message for keyword in ["what services", "available services", "list services"]):
-            return jsonify({"response": format_services_list()})
+        user_message = data["message"]
+        print(f"\nProcessing message: {user_message}")
         
-        if any(keyword in user_message for keyword in ["what products", "available products", "list products"]):
-            return jsonify({"response": format_products_list()})
-
-        # Handle "what is" queries with AI
-        if "what is" in user_message:
-            # Check services first
-            for service, price in SERVICES.items():
-                if service.replace(" ", "") in user_message.replace(" ", ""):
-                    context = f"""Service details:
-                    - Name: {service}
-                    - Cost: {price}
-                    - This is a professional automotive service at PomWorkz"""
-                    
-                    ai_response = get_ai_response("what_is", service, context)
-                    if ai_response:
-                        return jsonify({
-                            "response": f"{ai_response}\n\nService cost: {price}"
-                        })
-
-            # Then check products
-            for product, price in PRODUCTS.items():
-                if product.replace(" ", "") in user_message.replace(" ", ""):
-                    context = f"""Product details:
-                    - Name: {product}
-                    - Price: ₱{price}
-                    - This is an automotive part sold at PomWorkz"""
-                    
-                    ai_response = get_ai_response("what_is", product, context)
-                    if ai_response:
-                        return jsonify({
-                            "response": f"{ai_response}\n\nPrice: ₱{price}"
-                        })
-
-        # Handle greetings with AI
-        greetings = ["hi", "hello", "kumusta", "magandang", "good"]
-        if any(greeting in user_message for greeting in greetings):
-            greeting_response = get_ai_response("greeting", user_message)
-            if greeting_response:
-                return jsonify({"response": greeting_response})
+        response = get_ai_response(user_message)
+        print(f"AI response: {response}")
+        
+        if not response:
             return jsonify({
-                "response": "Hello! How can I help you with our auto parts and services today?"
-            })
-
-        # Handle price queries
-        if any(word in user_message for word in ["price", "cost", "how much"]):
-            for product, price in PRODUCTS.items():
-                if product in user_message:
-                    context = f"The price of {product} is ₱{price}"
-                    ai_response = get_ai_response("general", user_message, context)
-                    if ai_response:
-                        return jsonify({"response": ai_response})
-                    return jsonify({"response": f"The price of {product.capitalize()} is ₱{price}."})
-
-            for service, price in SERVICES.items():
-                if service in user_message:
-                    context = f"The cost of {service} is {price}"
-                    ai_response = get_ai_response("general", user_message, context)
-                    if ai_response:
-                        return jsonify({"response": ai_response})
-                    return jsonify({"response": f"The cost of {service.capitalize()} is {price}."})
-
-        # Try general AI response for other queries
-        ai_response = get_ai_response("general", user_message, KNOWLEDGE_BASE)
-        if ai_response:
-            return jsonify({"response": ai_response})
-
-        # Default help response with AI
-        help_response = get_ai_response("help", "") or """How can I help you? You can ask:
-• About specific product prices (e.g., "How much is a camshaft?")
-• About service costs (e.g., "What is the cost of CVT cleaning?")
-• For product/service information (e.g., "What is engine refresh?")
-• To see all available products or services"""
-        
-        return jsonify({"response": help_response})
+                "response": "I apologize, but I couldn't generate a response. Please try again."
+            }), 503
+            
+        return jsonify({"response": response})
 
     except Exception as e:
-        print(f"Error: {str(e)}")  # For debugging
+        print(f"Error in chat endpoint: {str(e)}")
         return jsonify({
-            "response": "I apologize, but I'm having trouble processing your request. Please try asking about specific products or services."
+            "response": "An error occurred while processing your request."
         }), 500
+
+
+@app.route("/health", methods=["GET"])
+def health():
+    try:
+        # Test Ollama connection
+        response = get_ollama_response("test", max_retries=1)
+        if response:
+            return jsonify({"status": "healthy", "ollama": "connected"}), 200
+        return jsonify({"status": "degraded", "ollama": "not responding"}), 503
+    except Exception as e:
+        return jsonify({"status": "unhealthy", "error": str(e)}), 503
 
 
 # WSGI Application
