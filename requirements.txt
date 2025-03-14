@@ -6,6 +6,11 @@ langchain-community
 chromadb
 unstructured
 pydantic
-flask==2.0.1
-requests==2.26.0
+Flask==2.0.1
+Werkzeug==2.0.1
+gunicorn==20.1.0
+requests==2.28.2
+urllib3==1.26.15
+chardet==4.0.0
+charset-normalizer==2.0.12
 waitress==2.0.0

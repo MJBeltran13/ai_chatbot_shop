@@ -6,6 +6,7 @@ from functools import lru_cache
 from waitress import serve
 import json
 import time
+from werkzeug.serving import run_simple
 
 app = Flask(__name__)
 
@@ -177,7 +178,12 @@ Context: {context}
             }
             
             print(f"Attempt {attempt + 1}: Sending request to Ollama API")
-            response = requests.post(OLLAMA_API_URL, json=data, timeout=15)
+            response = requests.post(
+                OLLAMA_API_URL, 
+                json=data, 
+                timeout=15,
+                headers={'Content-Type': 'application/json'}
+            )
             
             if response.status_code == 200:
                 result = response.json()
@@ -187,15 +193,21 @@ Context: {context}
             print(f"Attempt {attempt + 1} failed, {'retrying' if attempt < max_retries - 1 else 'giving up'}")
             time.sleep(1)  # Wait before retry
             
-        except Exception as e:
-            print(f"Error in attempt {attempt + 1}: {str(e)}")
+        except requests.exceptions.RequestException as e:
+            print(f"Request error in attempt {attempt + 1}: {str(e)}")
             if attempt < max_retries - 1:
-                time.sleep(1)  # Wait before retry
+                time.sleep(1)
+                continue
+        except Exception as e:
+            print(f"General error in attempt {attempt + 1}: {str(e)}")
+            if attempt < max_retries - 1:
+                time.sleep(1)
                 continue
             
     return None
 
 
+@lru_cache(maxsize=100)
 def get_ai_response(query):
     """Get AI response with fallback"""
     try:
@@ -303,4 +315,4 @@ def create_app():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 1551))
-    serve(app, host="0.0.0.0", port=port)
+    run_simple('0.0.0.0', port, app, use_reloader=True)
