@@ -1,17 +1,197 @@
-PamsWorkz specializes in high-quality automotive parts, including wheels, tires, and headlights.
+POMWORKZ AUTO PARTS CATALOG
 
-📌 Product Prices:
-- **Wheels**:
-  - Brand A (17-inch): $1000 each
-  - Brand A (18-inch): $1200 each
-  - Brand B (17-inch): $1100 each
-  - Brand B (18-inch): $1300 each
-- **Tires**:
-  - Brand X (Standard 15-inch): $2000 each
-  - Brand X (Premium 17-inch): $2500 each
-  - Brand Y (Standard 15-inch): $2200 each
-  - Brand Y (Off-Road 17-inch): $2700 each
-- **Headlights**:
-  - LED Headlights: $3000 each
-  - Xenon Headlights: $3500 each
-  - Halogen Headlights: $2000 each
+Created by: Cleo Dipasupil
+PomBot - Your Auto Parts Specialist
+
+===========================================
+PRODUCT CATALOG
+===========================================
+
+Engine Components:
+Camshaft - ₱1,700
+Valve - ₱1,500
+Muffler (Chix Pipe) - ₱1,900
+Piston Ring Set - ₱2,500
+Cylinder Head - ₱8,500
+Spark Plug - ₱450
+Air Filter - ₱650
+Oil Filter - ₱380
+
+Transmission & Drive:
+Pulley Set - ₱2,100
+Flyball - ₱500
+CVT Cleaner - ₱200
+Drive Belt - ₱850
+Clutch Assembly - ₱3,200
+Variator Set - ₱4,800
+Primary Clutch - ₱2,800
+Secondary Clutch - ₱2,600
+
+Lubricants & Oils:
+Motul Oil - ₱320
+Gear Oil - ₱75
+2T Engine Oil - ₱180
+4T Engine Oil - ₱250
+Brake Fluid - ₱120
+Coolant - ₱95
+
+Electrical Components:
+CDI Unit - ₱1,850
+Ignition Coil - ₱680
+Voltage Regulator - ₱580
+Starter Motor - ₱2,400
+Alternator - ₱3,100
+Battery - ₱1,200
+
+Suspension & Brakes:
+Brake Pads - ₱450
+Brake Disc - ₱780
+Shock Absorber - ₱1,850
+Front Fork Oil Seal - ₱320
+Brake Master Cylinder - ₱950
+
+Body & Accessories:
+Side Mirror - ₱350
+Headlight Assembly - ₱1,200
+Tail Light - ₱450
+Turn Signal - ₱180
+Speedometer - ₱2,800
+Handle Grips - ₱150
+
+===========================================
+SERVICES OFFERED
+===========================================
+
+Engine Services:
+Engine Upgrade (Touring/Racing) – Labor: ₱1,000 - ₱5,000
+Engine Refresh – ₱4,000
+Engine Rebuild – ₱8,000 - ₱15,000
+Valve Adjustment – ₱800
+Carburetor Cleaning – ₱600
+Cylinder Honing – ₱1,500
+
+Transmission Services:
+CVT Cleaning – ₱300
+CVT Overhaul – ₱2,500
+Belt Replacement – ₱400
+Clutch Adjustment – ₱350
+Transmission Rebuild – ₱3,500 - ₱6,000
+
+General Maintenance:
+Change Oil – ₱250
+Oil Filter Change – ₱180
+Brake Service – ₱450
+Tire Change – ₱200
+Chain Cleaning & Lubrication – ₱150
+General Tune-up – ₱800
+
+Machine Works:
+Machine Works – Labor: ₱1,000 - ₱3,000
+Boring & Honing – ₱1,200
+Valve Seat Cutting – ₱800
+Crankshaft Grinding – ₱1,500
+Cylinder Head Resurfacing – ₱900
+
+Electrical Services:
+Wiring Repair – ₱500 - ₱1,200
+CDI Replacement – ₱350
+Battery Service – ₱200
+Charging System Repair – ₱800
+Lighting System Repair – ₱400
+
+===========================================
+WORKSHOP INFORMATION
+===========================================
+
+About PomWorkz:
+PomWorkz is your trusted auto parts workshop specializing in engine components, 
+transmission parts, and professional automotive services. We provide quality 
+parts and expert labor for all your vehicle needs.
+
+Our team of experienced mechanics and technicians are dedicated to providing 
+top-quality service for motorcycles, scooters, and small engines.
+
+Services Include:
+- Engine diagnostics and repair
+- Transmission overhaul and maintenance
+- Performance upgrades and tuning
+- General maintenance and tune-ups
+- Machine shop services
+- Emergency repairs
+
+Contact Information:
+- Location: [Your Workshop Address]
+- Phone: [Your Phone Number]
+- Email: [Your Email Address]
+- Hours: Monday - Saturday, 8:00 AM - 6:00 PM
+
+Warranty Information:
+- All parts come with manufacturer warranty
+- Labor warranty: 30 days for general services, 90 days for major overhauls
+- Engine rebuilds: 6 months warranty
+
+Payment Methods:
+- Cash
+- Bank Transfer
+- GCash
+- Credit/Debit Cards (for major services)
+
+===========================================
+TECHNICAL SPECIFICATIONS
+===========================================
+
+Supported Vehicle Types:
+- Motorcycles (All brands and models)
+- Scooters (Automatic transmission)
+- ATVs and UTVs
+- Small engines (generators, pumps, etc.)
+
+Engine Types Serviced:
+- 2-stroke engines (50cc - 250cc)
+- 4-stroke engines (100cc - 1000cc)
+- Single cylinder and multi-cylinder
+- Air-cooled and liquid-cooled systems
+
+Transmission Types:
+- Manual transmission (all speeds)
+- Automatic CVT systems
+- Semi-automatic clutch systems
+
+===========================================
+FREQUENTLY ASKED QUESTIONS
+===========================================
+
+Q: How often should I change my engine oil?
+A: For motorcycles, every 3,000-5,000 km or every 3-6 months, whichever comes first.
+
+Q: What's included in a general tune-up?
+A: Oil change, spark plug replacement, air filter cleaning, carburetor adjustment, 
+   valve clearance check, and general inspection.
+
+Q: Do you provide warranty on parts and labor?
+A: Yes, all genuine parts come with manufacturer warranty, and we provide 
+   30-90 days labor warranty depending on the service.
+
+Q: Can you upgrade my engine for better performance?
+A: Yes, we offer various performance upgrades including big bore kits, 
+   racing exhausts, and carburetor upgrades.
+
+Q: Do you service all motorcycle brands?
+A: Yes, we service all brands including Honda, Yamaha, Suzuki, Kawasaki, 
+   and local brands like Rusi, TVS, and others.
+
+===========================================
+NOTES
+===========================================
+
+- All prices are in Philippine Pesos (₱)
+- Prices subject to change without notice
+- Labor costs may vary depending on complexity
+- Parts availability subject to stock
+- For major services, please call ahead for appointment
+- We use only genuine or high-quality aftermarket parts
+- All work performed by certified technicians
+
+Last Updated: [Current Date]
+Created by: Cleo Dipasupil
+Contact: [Workshop Contact Information]
