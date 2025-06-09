@@ -512,7 +512,7 @@ def get_ollama_response(query, context="", max_retries=3):
                 if is_tagalog:
                     return f"Ang bayad para sa {service} ay {price}."
                 else:
-                return f"The cost for {service} is {price}."
+                    return f"The cost for {service} is {price}."
                 
         # Check products
         for product, price in PRODUCTS.items():
@@ -954,7 +954,7 @@ Para sa mga tanong tungkol sa warranty, maaari kayong magtanong sa Tagalog o Eng
             if is_tagalog:
                 return "Ginawa ako ni Cleo Dipasupil."
             else:
-            return "I am created by Cleo Dipasupil."
+                return "I am created by Cleo Dipasupil."
 
         # Check for FAQ questions in English and Tagalog
         faq_keywords_en = ['faq', 'frequently asked', 'common questions']
