@@ -2,8 +2,8 @@ module.exports = {
   apps: [
     {
       name: 'ai-chatbot-pomworkz',
-      script: 'python',
-      args: 'start_production.py',
+      script: 'gunicorn',
+      args: 'main:app --bind 0.0.0.0:1551 --workers 2 --threads 4 --timeout 120 --keep-alive 2 --max-requests 1000 --max-requests-jitter 100 --preload',
       cwd: './',
       instances: 1,
       autorestart: true,
@@ -13,18 +13,16 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         FLASK_ENV: 'production',
-        HOST: '0.0.0.0',
         PORT: 1551,
-        THREADS: 4,
-        PDF_PATH: 'POMWORKZ AUTO PARTS CATALOG.pdf'
+        PDF_PATH: 'POMWORKZ AUTO PARTS CATALOG.pdf',
+        PYTHONPATH: '.'
       },
       env_development: {
         NODE_ENV: 'development',
         FLASK_ENV: 'development',
-        HOST: '127.0.0.1',
         PORT: 1551,
-        THREADS: 2,
-        PDF_PATH: 'POMWORKZ AUTO PARTS CATALOG.pdf'
+        PDF_PATH: 'POMWORKZ AUTO PARTS CATALOG.pdf',
+        PYTHONPATH: '.'
       },
       error_file: './logs/err.log',
       out_file: './logs/out.log',

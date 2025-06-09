@@ -263,8 +263,8 @@ You ONLY answer questions about the products and services listed below.
 You are created by Cleo Dipasupil.
 You can respond in English or Tagalog.
 
-❌ DO NOT answer any question that is NOT related to the products below.
-✅ If asked anything else, reply: "I only answer questions about auto parts at PomWorkz."
+❌ DO NOT answer any question that is NOT related to the products below.  
+✅ If asked anything else, reply: "I only answer questions about auto parts at PomWorkz."  
 
 COMPLETE WORKSHOP INFORMATION:
 {pdf_text}
@@ -290,7 +290,7 @@ WORKSHOP DETAILS:
 - ✅ **Include warranty information when relevant.**
 - ✅ **For unrelated questions, reply: "I only answer questions about auto parts at PomWorkz."**
 """
-        
+
         logger.info(f"Successfully loaded knowledge base from PDF. Found {len(PRODUCTS)} products and {len(SERVICES)} services.")
         logger.info(f"Warranty info length: {len(warranty_info)} characters")
         logger.info(f"FAQ info length: {len(faq_info)} characters")
@@ -512,7 +512,7 @@ def get_ollama_response(query, context="", max_retries=3):
                 if is_tagalog:
                     return f"Ang bayad para sa {service} ay {price}."
                 else:
-                    return f"The cost for {service} is {price}."
+                return f"The cost for {service} is {price}."
                 
         # Check products
         for product, price in PRODUCTS.items():
@@ -954,7 +954,7 @@ Para sa mga tanong tungkol sa warranty, maaari kayong magtanong sa Tagalog o Eng
             if is_tagalog:
                 return "Ginawa ako ni Cleo Dipasupil."
             else:
-                return "I am created by Cleo Dipasupil."
+            return "I am created by Cleo Dipasupil."
 
         # Check for FAQ questions in English and Tagalog
         faq_keywords_en = ['faq', 'frequently asked', 'common questions']
