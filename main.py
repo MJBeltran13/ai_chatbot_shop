@@ -1172,8 +1172,12 @@ def create_app():
     return app
 
 
+# Load knowledge base automatically when module is imported
+print(f"Loading knowledge base from PDF: {PDF_PATH}")
+load_knowledge_from_pdf(PDF_PATH)
+print(f"PDF Knowledge base loaded: {len(PRODUCTS)} products, {len(SERVICES)} services")
+
+
 if __name__ == "__main__":
-    print(f"Loading knowledge base from PDF: {PDF_PATH}")
-    load_knowledge_from_pdf(PDF_PATH)
     print(f"Starting server on {HOST}:{PORT}")
     run_simple(HOST, PORT, app, use_reloader=True)
