@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'ai-chatbot-pomworkz',
+      name: 'mj-chatbot',
       script: 'gunicorn',
       args: 'main:app --bind 0.0.0.0:1551 --workers 2 --threads 4 --timeout 120 --keep-alive 2 --max-requests 1000 --max-requests-jitter 100 --preload',
       interpreter: '/usr/bin/python3',
