@@ -5,7 +5,7 @@ langchain
 langchain-community
 chromadb
 unstructured
-pydantic
+pydantic>=2.4,<3
 Flask==2.3.3
 Werkzeug==2.3.7
 gunicorn==20.1.0
