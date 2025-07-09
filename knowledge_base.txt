@@ -1,7 +1,7 @@
-POMWORKZ AUTO PARTS CATALOG
+POMWORKZ MOTORCYCLE PARTS CATALOG
 
 Created by: Cleo Dipasupil
-PomBot - Your Auto Parts Specialist
+PomBot - Your Motorcycle Parts Specialist
 
 ===========================================
 PRODUCT CATALOG
@@ -13,9 +13,9 @@ Valve - ₱1,500
 Muffler (Chix Pipe) - ₱1,900
 Piston Ring Set - ₱2,500
 Cylinder Head - ₱8,500
-Spark Plug - ₱450
+Spark Plug - ₱200
 Air Filter - ₱650
-Oil Filter - ₱380
+Oil Filter - ₱200
 
 Transmission & Drive:
 Pulley Set - ₱2,100
@@ -104,8 +104,8 @@ WORKSHOP INFORMATION
 ===========================================
 
 About PomWorkz:
-PomWorkz is your trusted auto parts workshop specializing in engine components, 
-transmission parts, and professional automotive services. We provide quality 
+PomWorkz is your trusted motorcycle parts workshop specializing in engine components, 
+transmission parts, and professional motorcycle services. We provide quality 
 parts and expert labor for all your vehicle needs.
 
 Our team of experienced mechanics and technicians are dedicated to providing 
@@ -120,9 +120,9 @@ Services Include:
 - Emergency repairs
 
 Contact Information:
-- Location: [Your Workshop Address]
-- Phone: [Your Phone Number]
-- Email: [Your Email Address]
+- Location: Purok 5, Mataas na lupa, San Pascual, Batangas
+- Phone: 0946 755 2966
+- Email: dimapasocron@gmail.com
 - Hours: Monday - Saturday, 8:00 AM - 6:00 PM
 
 Warranty Information:
@@ -135,6 +135,36 @@ Payment Methods:
 - Bank Transfer
 - GCash
 - Credit/Debit Cards (for major services)
+
+===========================================
+HOW TO BOOK SERVICES
+===========================================
+
+To book our services, follow these simple steps:
+
+1. Go to our online booking platform: https://pomworkz.vercel.app/services/book
+
+2. Select Services: Choose from our wide range of available services including 
+   engine repairs, transmission work, general maintenance, and more.
+
+3. Type Customer Information: Enter your contact details, vehicle information, 
+   and service requirements.
+
+4. Pick Schedule: Select your preferred date and time for the service appointment.
+
+5. Book a Service: Press the "Book a service" button to confirm your appointment.
+
+Online Booking Benefits:
+- 24/7 booking availability
+- Instant confirmation
+- Service scheduling flexibility
+- Easy appointment management
+- No phone calls required
+
+For urgent repairs or if you prefer phone booking, you can also contact us directly 
+during business hours. Our online booking system ensures you get the fastest and 
+most convenient way to schedule your vehicle service.
+
 
 ===========================================
 TECHNICAL SPECIFICATIONS
@@ -192,6 +222,6 @@ NOTES
 - We use only genuine or high-quality aftermarket parts
 - All work performed by certified technicians
 
-Last Updated: [Current Date]
+Last Updated: June 10, 2025
 Created by: Cleo Dipasupil
-Contact: [Workshop Contact Information]
+Contact: 0997 928 8922

@@ -202,13 +202,45 @@ def parse_services_from_text(text):
 
 
 def load_knowledge_from_pdf(pdf_path):
-    """Load and parse knowledge base from PDF"""
+    """Load and parse knowledge base from PDF and knowledge_base.txt"""
     global KNOWLEDGE_BASE, PRODUCTS, SERVICES
+    
+    # Load additional knowledge from text file
+    additional_knowledge = ""
+    txt_path = "knowledge_base.txt"
+    if os.path.exists(txt_path):
+        try:
+            with open(txt_path, 'r', encoding='utf-8') as f:
+                additional_knowledge = f.read()
+            logger.info(f"Successfully loaded additional knowledge from {txt_path}")
+        except Exception as e:
+            logger.warning(f"Could not load {txt_path}: {e}")
     
     if not os.path.exists(pdf_path):
         logger.error(f"PDF file not found: {pdf_path}")
-        # Create a default PDF message
-        KNOWLEDGE_BASE = f"""
+        # If PDF not found but we have text file, use that
+        if additional_knowledge:
+            KNOWLEDGE_BASE = f"""
+You are PomBot, the auto parts specialist at PomWorkz workshop.
+You ONLY answer questions about the products and services listed below.
+You are created by Cleo Dipasupil.
+You can respond in English or Tagalog.
+
+❌ DO NOT answer any question that is NOT related to the products below.  
+✅ If asked anything else, reply: "I only answer questions about auto parts at PomWorkz."  
+
+{additional_knowledge}
+
+🚨 STRICT RESPONSE RULES:
+- ❌ **DO NOT answer unrelated questions.**
+- ✅ **Always include exact product prices and availability.**
+- ✅ **Include warranty information when relevant.**
+- ✅ **For unrelated questions, reply: "I only answer questions about auto parts at PomWorkz."**
+"""
+            return True
+        else:
+            # Create a default PDF message
+            KNOWLEDGE_BASE = f"""
 PDF file not found at: {pdf_path}
 
 Please create a PDF file with your product catalog and service information.
@@ -218,7 +250,7 @@ The PDF should include:
 
 Using fallback mode with basic responses only.
 """
-        return False
+            return False
     
     try:
         # Extract text from PDF
@@ -241,7 +273,7 @@ Using fallback mode with basic responses only.
         # Extract contact and workshop information
         workshop_info = extract_workshop_info(pdf_text)
         
-        # Create comprehensive knowledge base from extracted content
+        # Create comprehensive knowledge base from extracted content + additional text file
         KNOWLEDGE_BASE = f"""
 You are PomBot, the auto parts specialist at PomWorkz workshop.
 You ONLY answer questions about the products and services listed below.
@@ -267,7 +299,16 @@ FREQUENTLY ASKED QUESTIONS:
 {faq_info}
 
 WORKSHOP DETAILS:
-{workshop_info}
+{workshop_info}"""
+
+        # Add additional knowledge from text file if available
+        if additional_knowledge:
+            KNOWLEDGE_BASE += f"""
+
+ADDITIONAL INFORMATION:
+{additional_knowledge}"""
+
+        KNOWLEDGE_BASE += """
 
 🚨 STRICT RESPONSE RULES:
 - ❌ **DO NOT answer unrelated questions.**
@@ -279,6 +320,8 @@ WORKSHOP DETAILS:
         logger.info(f"Successfully loaded knowledge base from PDF. Found {len(PRODUCTS)} products and {len(SERVICES)} services.")
         logger.info(f"Warranty info length: {len(warranty_info)} characters")
         logger.info(f"FAQ info length: {len(faq_info)} characters")
+        if additional_knowledge:
+            logger.info(f"Additional knowledge from text file: {len(additional_knowledge)} characters")
         return True
         
     except Exception as e:
@@ -1046,6 +1089,147 @@ Para sa mga tanong tungkol sa warranty, maaari kayong magtanong sa Tagalog o Eng
                     return "Walang services na nakita sa PDF knowledge base."
                 else:
                     return "No services found in PDF knowledge base."
+
+        # Check for booking-related questions in English and Tagalog
+        booking_keywords_en = [
+            "how to book", "book service", "book a service", "booking process", 
+            "how do i book", "steps to book", "booking procedure", "how can i book",
+            "service booking", "book services", "schedule service", "appointment"
+        ]
+        booking_keywords_tl = [
+            "paano mag book", "pano mag book", "booking process", "paano mag appointment",
+            "book service", "mag book ng service", "paano mag schedule"
+        ]
+        
+        is_booking_query = (any(keyword in cleaned_query for keyword in booking_keywords_en) or
+                           any(keyword in cleaned_query for keyword in booking_keywords_tl))
+        
+        if is_booking_query:
+            if is_tagalog:
+                return """Paano mag-book ng services sa PomWorkz:
+
+1. 🌐 Pumunta sa aming online booking platform: https://pomworkz.vercel.app/services/book
+
+2. 🔧 Select Services: Piliin ang mga service na kailangan ninyo tulad ng engine repairs, transmission work, general maintenance, at iba pa.
+
+3. 📝 Type Customer Information: I-enter ang inyong contact details, vehicle information, at service requirements.
+
+4. 📅 Pick Schedule: Piliin ang preferred date at time para sa service appointment.
+
+5. ✅ Book a Service: I-click ang "Book a service" button para ma-confirm ang appointment.
+
+🌟 Benefits ng Online Booking:
+- Available 24/7
+- Instant confirmation
+- Flexible scheduling
+- Easy appointment management
+
+Para sa urgent repairs o kung gusto ninyo ng phone booking, pwede rin kayong tumawag sa amin during business hours!"""
+            else:
+                return """How to Book Services at PomWorkz:
+
+1. 🌐 Go to our online booking platform: https://pomworkz.vercel.app/services/book
+
+2. 🔧 Select Services: Choose from our wide range of available services including engine repairs, transmission work, general maintenance, and more.
+
+3. 📝 Type Customer Information: Enter your contact details, vehicle information, and service requirements.
+
+4. 📅 Pick Schedule: Select your preferred date and time for the service appointment.
+
+5. ✅ Book a Service: Press the "Book a service" button to confirm your appointment.
+
+🌟 Online Booking Benefits:
+- 24/7 booking availability
+- Instant confirmation
+- Service scheduling flexibility
+- Easy appointment management
+- No phone calls required
+
+For urgent repairs or if you prefer phone booking, you can also contact us directly during business hours!"""
+
+        # Check for ordering/purchasing-related questions in English and Tagalog
+        ordering_keywords_en = [
+            "how to order", "order product", "order products", "ordering process", 
+            "how do i order", "steps to order", "ordering procedure", "how can i order",
+            "product ordering", "buy product", "purchase product", "how to buy", "how to purchase"
+        ]
+        ordering_keywords_tl = [
+            "paano mag order", "pano mag order", "ordering process", "paano bumili",
+            "order product", "mag order ng product", "paano mag purchase", "bumili ng product"
+        ]
+        
+        is_ordering_query = (any(keyword in cleaned_query for keyword in ordering_keywords_en) or
+                            any(keyword in cleaned_query for keyword in ordering_keywords_tl))
+        
+        if is_ordering_query:
+            if is_tagalog:
+                return """Paano mag-order ng products sa PomWorkz:
+
+1. 🛒 Choose a Product: Piliin ang product na kailangan ninyo mula sa aming catalog
+
+2. ➕ Press Add to Cart: I-click ang "Add to Cart" para ilagay sa shopping cart
+
+3. 🛍️ Press Show Cart: I-click ang "Show Cart" para tingnan ang mga nasa cart ninyo
+
+4. 💳 Then Proceed to Checkout: I-click ang "Proceed to Checkout" para ma-complete ang order
+
+🌟 Simple at convenient na ordering process para sa lahat ng inyong motorcycle parts needs!"""
+            else:
+                return """How to Order Products at PomWorkz:
+
+1. 🛒 Choose a Product: Select the product you need from our catalog
+
+2. ➕ Press Add to Cart: Click "Add to Cart" to add the item to your shopping cart
+
+3. 🛍️ Press Show Cart: Click "Show Cart" to review the items in your cart
+
+4. 💳 Then Proceed to Checkout: Click "Proceed to Checkout" to complete your order
+
+🌟 Simple and convenient ordering process for all your motorcycle parts needs!"""
+
+        # Check for service process questions in English and Tagalog
+        service_process_keywords_en = [
+            "how is the process of the service", "service process", "what is the service process",
+            "how does the service work", "service workflow", "what happens during service",
+            "service procedure", "steps of service", "how do you service", "service steps"
+        ]
+        service_process_keywords_tl = [
+            "ano ang process ng service", "paano ang service process", "service workflow",
+            "ano ang nangyayari sa service", "process ng pag service", "hakbang sa service"
+        ]
+        
+        is_service_process_query = (any(keyword in cleaned_query for keyword in service_process_keywords_en) or
+                                   any(keyword in cleaned_query for keyword in service_process_keywords_tl))
+        
+        if is_service_process_query:
+            if is_tagalog:
+                return """Ang Service Process sa PomWorkz:
+
+1. 📅 Book Appointment: Mag-schedule ng service appointment sa aming website, sa phone, o personal na pagpunta.
+
+2. 🔍 Initial Assessment: Aming mga technicians ay mag-aassess ng inyong motorcycle at magbibigay ng detailed service plan.
+
+3. 🔧 Service Execution: Ang aming skilled mechanics ay gagawin ang requested services nang may precision at care.
+
+4. ✅ Quality Check: Thoroughly namin tinetest ang lahat ng work para ma-ensure na naaabot namin ang aming high standards.
+
+5. 🚀 Delivery: Pick up ninyo ang inyong motorcycle at mag-enjoy sa improved performance at reliability.
+
+🌟 Professional at comprehensive service process para sa best results!"""
+            else:
+                return """The Service Process at PomWorkz:
+
+1. 📅 Book Appointment: Schedule a service appointment through our website, by phone, or in person.
+
+2. 🔍 Initial Assessment: Our technicians will assess your motorcycle and provide a detailed service plan.
+
+3. 🔧 Service Execution: Skilled mechanics perform the requested services with precision and care.
+
+4. ✅ Quality Check: We thoroughly test all work to ensure everything meets our high standards.
+
+5. 🚀 Delivery: Pick up your motorcycle and enjoy the improved performance and reliability.
+
+🌟 Professional and comprehensive service process for the best results!"""
 
         # Check for greetings in English and Tagalog
         greetings_en = ["hello", "hi"]
